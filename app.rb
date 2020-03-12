@@ -28,6 +28,15 @@ get "/" do
 
     pp events_table.all.to_a
     @events = events_table.all.to_a
+    view "home_page"
+end
+
+get "/events" do
+    puts "params: #{params}"
+    
+    
+    pp events_table.all.to_a
+    @events = events_table.all.to_a
     view "events"
 end
 
@@ -38,7 +47,7 @@ get "/events/:id" do
     @event = events_table.where(id: params[:id]).to_a[0]
     pp @event
     @rsvps = rsvps_table.where(event_id: @event[:id]).to_a
-    @going_count = rsvps_table.where(event_id: @event[:id], going: true).count
+    @going_count = rsvps_table.where(event_id: @event[:id]).count
     view "event"
 end
 
@@ -46,7 +55,15 @@ get "/events/:id/rsvps/new" do
     puts "params: #{params}"
 
     @event = events_table.where(id: params[:id]).to_a[0]
-    view "new_rsvp"
+
+    @user_logged_in = users_table.where(id: session["user_id"]).to_a[0] 
+    if @user_logged_in 
+            #know the user is logged in 
+            view "new_rsvp"
+        else
+            #force user to log in before being able to purchase
+            view "new_login"
+        end
 end
 
 get "/events/:id/rsvps/create" do
@@ -58,8 +75,11 @@ get "/events/:id/rsvps/create" do
     rsvps_table.insert(
         event_id:@event[:id],   # need to associate what event we are rsvp'ing for, thus we add 'event id'
         user_id: session["user_id"],
+        billing_name: params["billing_name"],
+        billing_address: params["billing_address"],
         comments: params["comments"], 
-        going: params["going"]
+        going: params["going"], 
+        cc_number: BCrypt::Password.create(params["cc_number"])
     )
     view "create_rsvp"
 end
@@ -70,6 +90,12 @@ end
 
 post "/users/create" do
     puts "params: #{params}"
+    # if there's already a user with this email, skip (week 10 in-class):
+    #existing_user = users.table.where(email: params["email"]).to_a[0]
+    #if existing_user
+       # view "error"
+    #else
+    #week 9 in-class    
     users_table.insert(         #this inserts the data that is input into the 'new_user.erb' 
         #note that no 'id' is required, since no association is required
         name: params["name"],
@@ -101,4 +127,39 @@ end
 get "/logout" do
     session["user_id"] = nil #set this to remove cookies and log user out
     view "logout"
+end
+
+#week 10 in-class 
+get "/rsvps/:id/edit" do
+    puts "params: #{params}"
+
+    @rsvp = rsvps_table.where(id: params["id"]).to_a[0]
+    @event = events_table.where(id: @rsvp[:event_id]).to_a[0]
+    view "edit_rsvp"
+end
+
+post "/rsvps/:id/update" do
+    puts "params: #{params}"
+
+    @rsvp = rsvps_table.where(id: params["id"]).to_a[0]
+    @event = events_table.where(id: @rsvp[:event_id]).to_a[0]
+    #if @current_user && @current_user[:id] == @rsvp[:id]
+    #rsvps_table.where(id:params["id"]).update(
+        #going: params["going"],
+       # comments: params["comments"]
+   # )
+   # view "update_rsvp"
+    #else
+    #view "error"
+end
+
+get "/rsvps/:id/destroy" do
+    puts "params: #{params}"
+
+    rsvp = rsvps_table.where(id: params["id"]).to_a[0]
+    @event = events_table.where(id: rsvp[:event_id]).to_a[0]
+
+    rsvps_table.where(id: params["id"]).delete
+
+    view "destroy_rsvp"
 end

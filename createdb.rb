@@ -13,12 +13,16 @@ DB.create_table! :events do
   String :description, text: true
   String :date
   String :location
+  String :price
 end
 DB.create_table! :rsvps do
   primary_key :id
   foreign_key :event_id
   foreign_key :user_id
   Boolean :going
+  String :billing_name
+  String :billing_address
+  String :cc_number
   String :comments, text: true
 end
 DB.create_table! :users do
@@ -31,14 +35,40 @@ end
 # Insert initial (seed) data
 events_table = DB.from(:events)
 
-events_table.insert(title: "Bacon Burger Taco Fest", 
-                    description: "Here we go again bacon burger taco fans, another Bacon Burger Taco Fest is here!",
-                    date: "June 21",
-                    location: "Kellogg Global Hub")
+events_table.insert(title: "Coachella", 
+                    description: "The Coachella Valley Music and Arts Festival is an annual music and arts festival held at the Empire Polo Club.",
+                    date: "April 10-12",
+                    location: "Indio, CA", 
+                    price: "$1,000",
+                    img_filename: "coachella.png")
 
-events_table.insert(title: "Kaleapolooza", 
-                    description: "If you're into nutrition and vitamins and stuff, this is the event for you.",
-                    date: "July 4",
-                    location: "Nowhere")
+events_table.insert(title: "EDC", 
+                    description: "EDC is the largest electronic dance music festival in North America.",
+                    date: "May 15-17",
+                    location: "Las Vegas, NV",
+                    price: "$925",
+                    img_filename: "edc.jpg")
+
+events_table.insert(title: "Outside Lands", 
+                    description: "The Outside Lands Music and Arts Festival is a music festival featuring a diverse selection of artists.",
+                    date: "August 7-9",
+                    location: "San Francisco, CA", 
+                    price: "$900",
+                    img_filename: "outsidelands.jpg")
+
+events_table.insert(title: "Stagecoach", 
+                    description: "The Stagecoach Festival is an outdoor country music festival held at the Empire Polo Club.",
+                    date: "April 24-26",
+                    location: "Indio, CA",
+                    price: "$975",
+                    img_filename: "stagecoach.jpg")
+
+events_table.insert(title: "Ultra", 
+                    description: "Ultra Music Festival is an annual outdoor electronic music festival featuring some of the best DJ's in the world.",
+                    date: "March 20-21",
+                    location: "Miami, FL", 
+                    price: "$1,125", 
+                    img_filename: "ultra.jpg")
+
 
 puts "Success"
