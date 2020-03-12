@@ -14,6 +14,7 @@ DB.create_table! :events do
   String :date
   String :location
   String :price
+  String :img_filename
 end
 DB.create_table! :rsvps do
   primary_key :id
